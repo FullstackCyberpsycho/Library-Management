@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
         BookDAO dao = new BookDAO();
-        String title, author;
+        String title, authorName;
         int year, id;
 
         while (true) {
@@ -35,16 +35,24 @@ public class Main {
                     System.out.print("Год: "); year = in.nextInt();*/
                     System.out.println("Enter information about the book: ");
                     System.out.print("Name: "); title = in.nextLine();
-                    System.out.print("Author: "); author = in.nextLine();
+                    System.out.print("Author: "); authorName = in.nextLine();
                     System.out.print("Year: "); year = in.nextInt();
 
-                    dao.addBook(title, author, year);
+                    Author author = new Author(authorName);
+                    Book book = new Book(title, author, year);
+                    dao.addBook(book);
+
                     break;
                 case "2":
-                    dao.printAllBooks();
+                    List<Book> books = dao.getAllBooks();
+                    books.stream().forEach(b -> System.out.println(b.getCount() + ": " + b.getTitle() +
+                            ", " + b.getAuthor().getName() + ", " + b.getYear()));
+                    Book.setZeroCount();
+
                     break;
                 case "3":
-                    dao.printIDAndTitleBooks();
+                    List<String> titles = dao.getTitleBooks();
+                    titles.stream().forEach(System.out::println);
                     /*System.out.println("Введите ID и название книги для её изменения: ");
                     System.out.print("ID: "); id = in.nextInt();
                     System.out.print("Название: "); title = in.nextLine();*/
@@ -55,7 +63,8 @@ public class Main {
 
                     break;
                 case "4":
-                    dao.printIDAndTitleBooks();
+                    titles = dao.getTitleBooks();
+                    titles.stream().forEach(System.out::println);
                     //System.out.println("Введите ID книги для её удаления: ");
                     System.out.println("Enter ID books to delete it: ");
                     System.out.print("ID: "); id = in.nextInt();
