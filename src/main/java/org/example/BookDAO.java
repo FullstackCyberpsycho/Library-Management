@@ -5,15 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookDAO {
-    private final String url = "";
-    private final String user = "";
-    private final String password = "";
+    private final String url = "jdbc:postgresql://localhost:5432/library_management";
+    private final String user = "postgres";
+    private final String password = "1512BDS7425";
 
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
-    }
-
-    public void addBook(Book book) {
+    /*public void addBook(Book book) {
         String sql = "INSERT INTO books (title, author, year) VALUES (?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -27,9 +23,27 @@ public class BookDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }*/
+
+    public void addBook(Book book) {
+        String sql = "INSERT INTO books (title, authorName, authorSurname, authorPatronymic, year) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, book.getTitle());
+            pstmt.setString(2, book.getAuthor().getName());
+            pstmt.setString(3, book.getAuthor().getSurname());
+            pstmt.setString(4, book.getAuthor().getPatronymic());
+            pstmt.setInt(5, book.getYear());
+            pstmt.executeUpdate();
+            //System.out.println("Книга добавлена");
+            System.out.println("The book is added");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public List<Book> getAllBooks() {
+    /*public List<Book> getAllBooks() {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT id, title, author, year FROM books";
 
@@ -44,6 +58,34 @@ public class BookDAO {
                 int year = rs.getInt("year");
 
                 Author author = new Author(authorName);
+                Book book = new Book(id, title, author, year);
+                books.add(book);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return books;
+    }*/
+
+    public List<Book> getAllBooks() {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT id, title, authorName, authorSurname, authorPatronymic, year FROM books";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String authorName = rs.getString("authorName");
+                String authorSurname = rs.getString("authorSurname");
+                String authorPatronymic = rs.getString("authorPatronymic");
+                int year = rs.getInt("year");
+
+                Author author = new Author(authorName, authorSurname, authorPatronymic);
                 Book book = new Book(id, title, author, year);
                 books.add(book);
             }
@@ -107,6 +149,10 @@ public class BookDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private final Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
 }
 
